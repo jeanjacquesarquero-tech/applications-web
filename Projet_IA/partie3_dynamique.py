@@ -1,54 +1,58 @@
-# --- Données du problème ---
+import time
+
+# --- Données ---
 joueurs = [
-    {"nom": "Alice", "score": 88, "salaire": 1200},
-    {"nom": "Bob", "score": 91, "salaire": 1800},
-    {"nom": "Clara", "score": 84, "salaire": 950},
-    {"nom": "David", "score": 93, "salaire": 2100},
-    {"nom": "Emma", "score": 79, "salaire": 800},
-    {"nom": "Frank", "score": 87, "salaire": 2400},
-    {"nom": "Grace", "score": 85, "salaire": 1050},
-    {"nom": "Hugo", "score": 89, "salaire": 1600},
+    {"nom": "Alice", "score": 88}, {"nom": "Bob", "score": 91},
+    {"nom": "Clara", "score": 84}, {"nom": "David", "score": 93},
+    {"nom": "Emma", "score": 79}, {"nom": "Frank", "score": 87},
+    {"nom": "Grace", "score": 85}, {"nom": "Hugo", "score": 89}
 ]
 
-budget_max = 5000
+# 1. Score Cumulé Récursif
+def score_cumule(liste_joueurs, k):
+    # Trier par score d'abord
+    joueurs_tries = sorted(liste_joueurs, key=lambda x: x["score"], reverse=True)
+    
+    def recursif(n):
+        if n <= 0:
+            return 0
+        current_score = joueurs_tries[n-1]["score"]
+        total = current_score + recursif(n-1)
+        print(f"Étape {n}: Ajout de {joueurs_tries[n-1]['nom']} (+{current_score}) -> Total: {total}")
+        return total
 
-# Table pour stocker les résultats et éviter les calculs inutiles
+    print(f"\nCalcul du score cumulé pour les {k} meilleurs joueurs:")
+    return recursif(k)
+
+# 2. Fibonacci Naïf vs Mémoïsé
+# Scores des deux meilleurs (ex: David 93, Bob 91)
+val1, val2 = 93, 91
+
+def fib_naif(n):
+    if n == 0: return val1
+    if n == 1: return val2
+    return fib_naif(n-1) + fib_naif(n-2)
+
 memo = {}
+def fib_memo(n):
+    if n == 0: return val1
+    if n == 1: return val2
+    if n not in memo:
+        memo[n] = fib_memo(n-1) + fib_memo(n-2)
+    return memo[n]
 
-def resoudre_sac_a_dos(i, budget_restant):
-    # Cas de base : plus de joueurs ou plus de budget
-    if i < 0 or budget_restant <= 0:
-        return 0, []
-    
-    # Si le résultat est déjà en mémoire, on le retourne
-    if (i, budget_restant) in memo:
-        return memo[(i, budget_restant)]
-    
-    actuel = joueurs[i]
-    
-    # Option 1 : On ne choisit pas ce joueur
-    score_sans, liste_sans = resoudre_sac_a_dos(i - 1, budget_restant)
-    
-    # Option 2 : On choisit ce joueur (si on peut se le payer)
-    score_avec = -1
-    if actuel['salaire'] <= budget_restant:
-        s, l = resoudre_sac_a_dos(i - 1, budget_restant - actuel['salaire'])
-        score_avec = actuel['score'] + s
-        liste_avec = l + [actuel['nom']]
-    
-    # On compare les deux options pour garder la meilleure
-    if score_avec > score_sans:
-        resultat = (score_avec, liste_avec)
-    else:
-        resultat = (score_sans, liste_sans)
-    
-    # On garde en mémoire pour la suite
-    memo[(i, budget_restant)] = resultat
-    return resultat
+# --- Tests de performance ---
+n_test = 30 # No pongas más de 35 o el Naïf explotará tu PC
 
-# Lancement de l'algorithme
-meilleur_score, equipe_ideale = resoudre_sac_a_dos(len(joueurs) - 1, budget_max)
+start = time.time()
+res_naif = fib_naif(n_test)
+end = time.time()
+print(f"\nFibonacci Naïf({n_test}): {res_naif} | Temps: {end-start:.4f}s")
 
-print("--- RÉSULTAT OPTIMAL (PROGRAMMATION DYNAMIQUE) ---")
-print(f"Équipe sélectionnée : {equipe_ideale}")
-print(f"Score total : {meilleur_score}")
+start = time.time()
+res_memo = fib_memo(n_test)
+end = time.time()
+print(f"Fibonacci Mémo({n_test}): {res_memo} | Temps: {end-start:.4f}s")
+
+# Exécution de score_cumule
+score_cumule(joueurs, 3)
