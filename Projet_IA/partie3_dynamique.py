@@ -42,7 +42,7 @@ def fib_memo(n):
     return memo[n]
 
 # --- Tests de performance ---
-n_test = 30 # No pongas más de 35 o el Naïf explotará tu PC
+n_test = 30 # 
 
 start = time.time()
 res_naif = fib_naif(n_test)
